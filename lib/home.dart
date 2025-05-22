@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_graphql_sample/graphQl_fetch.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -9,9 +10,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String readRepositories = r"""
+  GraphQlFetchData _graphQlFetchData = GraphQlFetchData();
+
+  Map<String, dynamic>? data; //_graphQlFetchData.fetchData(repository)
+
+  TextEditingController _controller = TextEditingController();
+
+  final String readRepositories = r"""
 query ($name: String!) {
-    __type(name: $name) {
+  __type(name: $name) {
    name 
   }
   company {
@@ -20,6 +27,8 @@ query ($name: String!) {
   }
 }
 """;
+
+  List<dynamic> list = ['__typename', 'ceo', 'coo'];
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +39,7 @@ query ($name: String!) {
             Container(
               alignment: Alignment.center,
               child: Text(
-                'fsdf',
+                'GraphQl Widget',
                 style: TextStyle(
                   fontSize: 20,
                   color: Colors.black,
@@ -63,17 +72,55 @@ query ($name: String!) {
                   return const Text('No repositories');
                 }
 
-                return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: repositories.length,
-                    itemBuilder: (context, index) {
-                      final repository = repositories[index];
+                return Container(
+                  height: 200,
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: repositories.length,
+                      itemBuilder: (context, index) {
+                        final repository = repositories[list[index]];
 
-                      return Text(repository ?? '');
-                    });
+                        return Text(repository ?? '');
+                      }),
+                );
               },
             ),
+            Container(
+              child: Text(
+                'GraphQl class => Fetch from another class ',
+                style: TextStyle(fontSize: 20),
+              ),
+            ),
+            SizedBox(height: 20),
+            _myButton(),
+            TextField(
+              controller: _controller,
+            )
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _myButton() {
+    return TextButton(
+      onPressed: () async {
+        data = await _graphQlFetchData.fetchData();
+        setState(() {
+          _controller.text = data?['ceo'] ?? '';
+        });
+      },
+      child: Container(
+        alignment: Alignment.center,
+        height: 50,
+        width: 195,
+        decoration: BoxDecoration(
+          color: Colors.green,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Text(
+          'Post',
+          style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
         ),
       ),
     );
